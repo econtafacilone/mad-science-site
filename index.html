@@ -16,6 +16,7 @@
         .font-science { font-family: 'Orbitron', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .neon-border { border-left: 4px solid var(--mad-teal); }
+        .qr-container { background: white; padding: 12px; border-radius: 12px; display: inline-block; }
     </style>
 </head>
 <body class="overflow-x-hidden">
@@ -33,6 +34,12 @@
                 <p class="text-gray-400 text-lg max-w-lg mx-auto lg:mx-0">
                     Únete a nosotros en una jornada de experimentos, exposiciones y ciencia extrema. Evento exclusivo para alumnos de 2.º Grado.
                 </p>
+                
+                <div class="inline-block glass border-l-4 border-teal-400 px-6 py-2 mb-4">
+                    <span class="text-xs uppercase text-gray-500 block">Folio de Acceso</span>
+                    <span id="display-folio" class="text-2xl font-science text-white tracking-tighter">CARGANDO...</span>
+                </div>
+
                 <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
                     <div class="glass px-6 py-3 rounded-lg border-l-4 border-yellow-400">
                         <span class="block text-xs text-gray-400 uppercase">Fecha</span>
@@ -45,11 +52,16 @@
                 </div>
             </div>
 
-            <div class="relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-teal-500 to-yellow-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                <div class="relative bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+            <div class="relative group flex flex-col items-center">
+                <div class="absolute -inset-1 transition duration-1000"></div>
+                <div class="relative bg-black rounded-2xl overflow-hidden mb-6">
                     <img src="plantilla.png" alt="Boleto Mad Science" class="w-full h-auto transform hover:scale-105 transition duration-500">
                 </div>
+                
+                <!--<div class="qr-container shadow-[0_0_20px_rgba(64,224,208,0.3)]">
+                    <img id="dynamic-qr" src="" alt="QR Access" class="w-32 h-32">
+                </div>
+                <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-widest">Escanea para validar entrada</p>-->
             </div>
         </div>
     </header>
@@ -83,6 +95,54 @@
         <p>&copy; 2026 Mad Science Project. Todos los derechos reservados.</p>
         <p class="mt-2 font-science tracking-widest uppercase">E-CONTAFACIL TECH</p>
     </footer>
+
+    <script>
+        window.onload = function() {
+            // Leer folio de la URL (?folio=123)
+            const params = new URLSearchParams(window.location.search);
+            const folio = params.get('folio');
+            
+            const folioDisplay = document.getElementById('display-folio');
+            //const qrElement = document.getElementById('dynamic-qr');
+
+		// 2. Definir la validación (Regex para: 4 dígitos . 000 . 000)
+        const formatoValido = /^\d{4}\.000\.000$/;
+            if (folio && formatoValido.test(folio)) {
+				// Extraer los primeros 4 dígitos para validar el rango numérico
+				const numeroBase = parseInt(folio.split('.')[0]);
+
+				if (numeroBase >= 1250 && numeroBase <= 1549) {
+					// EL FOLIO ES VÁLIDO Y ESTÁ EN RANGO
+					folioDisplay.innerText = folio;
+					folioDisplay.classList.remove('text-red-500');
+					folioDisplay.classList.add('text-white');
+
+					//const currentUrl = window.location.href;
+					//qrElement.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+				} else {
+					// Número fuera de rango (1250-1549)
+					mostrarError("RANGO INVÁLIDO");
+				}
+			
+                // Actualizar texto del folio
+                //folioDisplay.innerText = folio;
+                
+                // Generar QR dinámico (Usa la URL completa del alumno como dato del QR)
+                //const currentUrl = "Museo de la MAD SCIENCE|¡Experimenta la locura!|18.MAR.26|Grupo Terceros C,D,E y F|" + folioDisplay.innerText;
+                //qrElement.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+            } else {
+                folioDisplay.innerText = "INVITADO";
+                //qrElement.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAD_SCIENCE_INVITADO`;
+            }
+			
+			function mostrarError(mensaje) {
+				folioDisplay.innerText = mensaje;
+				folioDisplay.classList.add('text-red-500'); // Pone el texto en rojo si falla
+				qrElement.style.opacity = "0.2"; // Opaca el QR para indicar que no es válido
+				qrElement.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=INVALIDO`;
+			}
+        };
+    </script>
 
 </body>
 </html>
